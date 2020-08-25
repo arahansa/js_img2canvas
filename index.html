@@ -1,0 +1,61 @@
+<html>
+<head>
+
+</head>
+<body>
+
+<div id="status" style="width: 50px;height:50px;"></div>
+<img src="temp.png" id="i" style="display:none">
+<canvas id="c"></canvas>
+
+<script>
+
+    document.querySelector("#i").onload = ({target})=>{
+        const {width, height} = target;
+        const ctx = Object.assign(document.querySelector("#c"), {width, height}).getContext("2d");
+        ctx.drawImage(target, 0, 0);
+
+        const sObj = new SharedArrayBuffer(width * height * 4);
+        const u8c = new Uint8ClampedArray(sObj);
+        u8c.set(ctx.getImageData(0, 0, width, height).data);
+
+    };
+    // https://stackoverflow.com/questions/6735470/get-pixel-color-from-canvas-on-mouseover
+
+    function findPos(obj){
+        var current_left = 0, current_top = 0;
+        if (obj.offsetParent){
+            do{
+                current_left += obj.offsetLeft;
+                current_top += obj.offsetTop;
+            }while(obj = obj.offsetParent);
+            return {x: current_left, y: current_top};
+        }
+        return undefined;
+    }
+
+    function rgbToHex(r, g, b){
+        if (r > 255 || g > 255 || b > 255)
+            throw "Invalid color component";
+        return ((r << 16) | (g << 8) | b).toString(16);
+    }
+
+    document.querySelector("#c").addEventListener("click", function(e){
+        var position = findPos(this);
+        var x = e.pageX - position.x;
+        var y = e.pageY - position.y;
+        var coordinate = "x=" + x + ", y=" + y;
+        var canvas = this.getContext('2d');
+        var p = canvas.getImageData(x, y, 1, 1).data;
+        var hex = "#" + ("000000" + rgbToHex(p[0], p[1], p[2])).slice(-6);
+        // alert("HEX: " + hex);
+        document.querySelector("#status").innerHTML = hex;
+    });
+
+</script>
+</body>
+
+
+
+</html>
+
